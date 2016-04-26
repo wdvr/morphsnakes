@@ -29,8 +29,8 @@ __author__ = "P. Márquez Neila <p.mneila@upm.es>"
 
 from itertools import cycle
 
+import sys
 import numpy as np
-from scipy import ndimage
 from scipy.ndimage import binary_dilation, binary_erosion, \
                         gaussian_filter, gaussian_gradient_magnitude
 
@@ -166,7 +166,7 @@ class MorphACWE(object):
         # Image attachment.
         dres = np.array(np.gradient(u))
         abs_dres = np.abs(dres).sum(0)
-        #aux = abs_dres * (c0 - c1) * (c0 + c1 - 2*data)
+        # aux = abs_dres * (c0 - c1) * (c0 + c1 - 2*data)
         aux = abs_dres * (self.lambda1*(data - c1)**2 - self.lambda2*(data - c0)**2)
         
         res = np.copy(u)
@@ -325,7 +325,6 @@ def evolve_visual(msnake, levelset=None, num_iters=20, background=None):
     
     ax2 = fig.add_subplot(1,2,2)
     ax_u = ax2.imshow(msnake.levelset)
-    ppl.pause(0.001)
     
     # Iterate.
     for i in range(num_iters):
@@ -337,7 +336,9 @@ def evolve_visual(msnake, levelset=None, num_iters=20, background=None):
         ax1.contour(msnake.levelset, [0.5], colors='r')
         ax_u.set_data(msnake.levelset)
         fig.canvas.draw()
-        #ppl.pause(0.001)
+        # sleep on windows platform - matplotlib issue
+        if sys.platform == 'win32' or sys.platform == 'cygwin':
+            ppl.pause(0.001)
     
     # Return the last levelset.
     return msnake.levelset
@@ -357,7 +358,6 @@ def evolve_visual3d(msnake, levelset=None, num_iters=20):
         The number of iterations.
     """
     from mayavi import mlab
-    import matplotlib.pyplot as ppl
     
     if levelset is not None:
         msnake.levelset = levelset
